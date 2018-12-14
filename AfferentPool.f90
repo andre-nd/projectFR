@@ -125,10 +125,15 @@ module AfferentPoolClass
             class(AfferentPool), intent(inout) :: self
             real(wp), intent(in) :: t, proprioceptorFR
             integer :: i
-            
+            real(wp) :: frequency
+
+            frequency = proprioceptorFR - self%unit(i)%frequencyThreshold_Hz + 5.0_wp
+            if (frequency < 5.0) then 
+                frequency = 0.0_wp
+            end if
+
             do i = 1, self%AFnumber
-                call self%unit(i)%atualizeAfferentUnit(t, max(0.0, (proprioceptorFR - &
-                self%unit(i)%frequencyThreshold_Hz)*self%conf%timeStep_ms/1000.0))
+                call self%unit(i)%atualizeAfferentUnit(t, frequency*self%conf%timeStep_ms/1000.0)
             end do
         end subroutine
 

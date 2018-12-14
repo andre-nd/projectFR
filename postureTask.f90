@@ -153,15 +153,15 @@ module postureTaskClass
                 end do
             end if
             
-            if (mod(t, 500.0_wp) == 0) then
+            if (mod(t, 1000.0_wp) == 0) then
                 print *, 'muscle ', muscularTorque
-                print *, 'passive', -0.65*self%mass*g*self%height*(self%ankleAngle_rad(timeIndex)-3*pi/180)
+                print *, 'passive', -0.65*self%mass*g*self%height*(self%ankleAngle_rad(timeIndex)-0*pi/180)
                 print *, 'gravity', self%mass*g*self%height*sin(self%ankleAngle_rad(timeIndex))
                 print *, 'viscosity', - 5.81*self%ankleOmega_rad_s(timeIndex)
             end if
 
             self%ankleTorque_Nm(timeIndex) = muscularTorque - 5.81*self%ankleOmega_rad_s(timeIndex) - &
-                                             0.65*self%mass*g*self%height*(self%ankleAngle_rad(timeIndex)-3*pi/180) + &
+                                             0.65*self%mass*g*self%height*(self%ankleAngle_rad(timeIndex)-0*pi/180) + &
                                              self%mass*g*self%height*sin(self%ankleAngle_rad(timeIndex))
         
         end subroutine

@@ -168,7 +168,7 @@ module MotorUnitClass
         init_MotorUnit%MUSpatialDistribution = init_MotorUnit%conf%parameterSet(paramTag,pool, index)       
         if (trim(init_MotorUnit%MUSpatialDistribution).eq.'random') then
             call random_number(randomNumber)
-            radius = (muscleThickness/2.0) * randomNumber
+            radius = sqrt(((muscleThickness/2.0)**2) * randomNumber)
             call random_number(randomNumber)
             angle = 2.0 * pi * randomNumber
         end if

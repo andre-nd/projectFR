@@ -58,7 +58,7 @@ program PosturalControl
     allocate(IbIn_V_mV(timeLength))
     allocate(IbFR(timeLength))
 
-    FR = 50
+    FR = 43
     GammaOrder = 25
     
     filename = 'GammaFallTime.txt'
@@ -168,9 +168,9 @@ program PosturalControl
         print '(a, F15.6)', 'diameter', interneuronPools(3)%unit(1)%Compartments(1)%diameter_mum
         print '(a, F15.6)', 'capacitance', interneuronPools(3)%unit(1)%Compartments(1)%capacitance_nF
         call random_number(dynGamma)
-        dynGamma = 28 + 8*dynGamma
+        dynGamma = 30 + 4*dynGamma
         call random_number(statGamma)
-        statGamma = 28 + 8*statGamma
+        statGamma = 30 + 4*statGamma
         print '(A, F15.6)', 'Dynamic Gamma = ',  dynGamma
         print '(A, F15.6)', 'Static Gamma = ', statGamma
         continueFlag = .true.
@@ -228,6 +228,7 @@ program PosturalControl
             ! call neuralTractPools(1)%listSpikes()
             call motorUnitPools(2)%listSpikes()
             call afferentPools(2)%listSpikes()
+            call afferentPools(4)%listSpikes()
             call afferentPools(6)%listSpikes()
             ! !call motorUnitPools(1)%getMotorUnitPoolEMG()
             
@@ -242,6 +243,12 @@ program PosturalControl
             call gp%ylabel('Afferent index')
             call gp%plot(afferentPools(2)%poolTerminalSpikes(:,1), &
             afferentPools(2)%poolTerminalSpikes(:,2), 'with points pt 5 lc rgb "#0008B0"')
+
+            call gp%title('TA AF Ia spike instants at the soma')
+            call gp%xlabel('t (s))')
+            call gp%ylabel('Afferent index')
+            call gp%plot(afferentPools(4)%poolTerminalSpikes(:,1), &
+            afferentPools(4)%poolTerminalSpikes(:,2), 'with points pt 5 lc rgb "#0008B0"')
 
             call gp%title('AF II spike instants at the soma')
             call gp%xlabel('t (s))')
