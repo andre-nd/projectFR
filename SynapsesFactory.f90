@@ -212,16 +212,17 @@ module SynapsesFactoryModule
                                                                 weight = declineFactor / (declineFactor + neuronsDistance**2)
                                                                 gmax = gmax * weight
                                                             end if
+                                                            !gmax1 = gmax + unitIn*0.1/size(motorUnitPools(poolIn)%unit)
                                                             call motorUnitPools(poolIn)%unit(unitIn)%&
-                                                            Compartments(compartmentIn)%SynapsesIn(synapseComp)%&
-                                                            addConductance(gmax, delay, dyn, var, tau)
+                                                                 Compartments(compartmentIn)%SynapsesIn(synapseComp)%&
+                                                                 addConductance(gmax, delay, dyn, var, tau)
                                                             
                                                             if (allocated(neuralTractPools(poolOut)%&
                                                                 unit(unitOut)%transmitSpikesThroughSynapses)) then
                                                                 
                                                                 
                                                                 allocate(tempTransmitSpikes(size(neuralTractPools(poolOut)%&
-                                                                    unit(unitOut)%transmitSpikesThroughSynapses)))
+                                                                         unit(unitOut)%transmitSpikesThroughSynapses)))
                                                                 
                                                                 do j = 1, size(tempTransmitSpikes)
                                                                     call tempTransmitSpikes(j)%&

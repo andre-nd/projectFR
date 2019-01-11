@@ -357,7 +357,7 @@ module MuscleSpindleClass
         real(wp), dimension(2) :: df
 
 
-        df = self%dfdt(t,gammaMNDynamicFR, gammaMNStaticFR)
+        df = self%dfdt(t, gammaMNDynamicFR, gammaMNStaticFR)
         self%fusimotorActivation(1) = self%fusimotorActivation(1) + self%conf%timeStep_ms / 1000.0 * df(1) 
         self%fusimotorActivation(2) = self%fusimotorActivation(2) + self%conf%timeStep_ms / 1000.0 * df(2)
         self%fusimotorActivation(3) = gammaMNStaticFR**2/(gammaMNStaticFR**2 + self%freq_Chain_Hz**2)

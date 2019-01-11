@@ -91,7 +91,7 @@ module GolgiTendonOrganClass
         ! '''
         class(GolgiTendonOrgan), intent(inout) :: self
         real(wp), intent(in) :: t, tendonForce
-        real(wp) :: Gg, Gf, Rgn, RgfSlope, RgfDotSlope, Rgf
+        real(wp) :: Gf, Rgn, RgfSlope, RgfDotSlope, Rgf
         
         Gf = 4.0
 

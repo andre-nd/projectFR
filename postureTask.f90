@@ -110,7 +110,7 @@ module postureTaskClass
             
             call self%computeTorque(t)
 
-            if (t > 4000.0) then
+            if (t > 2000.0) then
                 dthetadt = self%ankleOmega_rad_s(timeIndex)
                 domegadt = self%ankleTorque_Nm(timeIndex)/self%momentOfInertia
                 self%ankleOmega_rad_s(timeIndex + 1) = self%ankleOmega_rad_s(timeIndex) + &
@@ -154,6 +154,18 @@ module postureTaskClass
             end if
             
             if (mod(t, 1000.0_wp) == 0) then
+                print *, 'Sol Force ', self%muscles(1)%muscle%HillMuscle%force(timeIndex)
+                print *, 'MG Force ', self%muscles(2)%muscle%HillMuscle%force(timeIndex)
+                print *, 'LG Force ', self%muscles(3)%muscle%HillMuscle%force(timeIndex)
+                print *, 'TA Force ', self%muscles(4)%muscle%HillMuscle%force(timeIndex)
+                print *, 'Sol Activation ', self%muscles(1)%muscle%HillMuscle%activationTypeI(timeIndex)
+                print *, 'MG Activation ', self%muscles(2)%muscle%HillMuscle%activationTypeI(timeIndex)
+                print *, 'LG Activation ', self%muscles(3)%muscle%HillMuscle%activationTypeI(timeIndex)
+                print *, 'TA Activation ', self%muscles(4)%muscle%HillMuscle%activationTypeI(timeIndex)
+                print *, 'Sol length ', self%muscles(1)%muscle%HillMuscle%length_m(timeIndex)
+                print *, 'MG length ', self%muscles(2)%muscle%HillMuscle%length_m(timeIndex)
+                print *, 'LG length ', self%muscles(3)%muscle%HillMuscle%length_m(timeIndex)
+                print *, 'TA length ', self%muscles(4)%muscle%HillMuscle%length_m(timeIndex)
                 print *, 'muscle ', muscularTorque
                 print *, 'passive', -0.65*self%mass*g*self%height*(self%ankleAngle_rad(timeIndex)-0*pi/180)
                 print *, 'gravity', self%mass*g*self%height*sin(self%ankleAngle_rad(timeIndex))

@@ -720,6 +720,8 @@ module MotorUnitClass
         if (allocated(self%lastCompSpikeTrain)) deallocate(self%lastCompSpikeTrain)
         ! ## Vector with the instants of spikes at the terminal.
         if (allocated(self%terminalSpikeTrain)) deallocate(self%terminalSpikeTrain)
+
+        
     end subroutine
 
     subroutine createStimulus(self)

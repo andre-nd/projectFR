@@ -131,6 +131,8 @@ module NeuralTractUnitClass
             class(NeuralTractUnit), intent(inout) :: self
 
             call self%spikesGenerator%reset()        
+
+            
         end subroutine
 
 end module NeuralTractUnitClass

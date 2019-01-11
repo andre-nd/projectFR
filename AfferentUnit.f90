@@ -32,7 +32,7 @@ module AfferentUnitClass
     use DynamicalArrays
     implicit none
     private
-    integer, parameter :: wp = kind( 1.0d0 )
+    integer, parameter :: wp = kind(1.0d0)
     real(wp), parameter :: pi = 4 * atan(1.0_wp)    
     public :: AfferentUnit
 
@@ -636,6 +636,8 @@ module AfferentUnitClass
             if (allocated(self%terminalSpikeTrain)) deallocate(self%terminalSpikeTrain)
             
             call self%spikesGenerator%reset()
+
+            
         end subroutine
 
 

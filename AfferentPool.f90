@@ -27,7 +27,7 @@ module AfferentPoolClass
     use AfferentUnitClass
     implicit none
     private
-    integer, parameter :: wp = kind( 1.0d0 )
+    integer, parameter :: wp = kind(1.0d0)
     real(wp), parameter :: pi = 4 * atan(1.0_wp)    
     public :: AfferentPool
 
@@ -125,14 +125,13 @@ module AfferentPoolClass
             class(AfferentPool), intent(inout) :: self
             real(wp), intent(in) :: t, proprioceptorFR
             integer :: i
-            real(wp) :: frequency
-
-            frequency = proprioceptorFR - self%unit(i)%frequencyThreshold_Hz + 5.0_wp
-            if (frequency < 5.0) then 
-                frequency = 0.0_wp
-            end if
+            real(wp) :: frequency            
 
             do i = 1, self%AFnumber
+                frequency = proprioceptorFR - self%unit(i)%frequencyThreshold_Hz + 5.0_wp
+                if (frequency < 5.0) then 
+                    frequency = 0.0_wp
+                end if
                 call self%unit(i)%atualizeAfferentUnit(t, frequency*self%conf%timeStep_ms/1000.0)
             end do
         end subroutine

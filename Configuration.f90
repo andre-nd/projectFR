@@ -1,6 +1,6 @@
 ! '''
 !     Neuromuscular simulator in Fortran.
-!     Copyright (C) 2018  Renato Naville Watanabe
+!     Copyright (C) 2019  Renato Naville Watanabe
 
 !     This program is free software: you can redistribute it and/or modify
 !     it under the terms of the GNU General Public License as published by
@@ -71,6 +71,7 @@ module ConfigurationClass
             procedure :: parameterSet
             procedure :: determineSynapses
             procedure :: changeConfigurationParameter
+            procedure :: showConfigurationParameter
 
     end type Configuration
 
@@ -404,6 +405,31 @@ module ConfigurationClass
                     if (self%confMatrix%item(i)%item(1)%string == paramTag) then
                         self%confMatrix%item(i)%item(2)%string = trim(value1)
                         self%confMatrix%item(i)%item(3)%string = trim(value2)
+                        found = .true.
+                    end if
+                end do
+                
+                ! In case the parameter did not match any tag
+                if (.not.found) then
+                    print *, "Following parameter tag was not found on configuration file:"
+                    print *, paramTag
+                    stop 1
+                end if
+            end subroutine
+
+            subroutine showConfigurationParameter(self, paramTag)
+                ! '''
+                ! '''
+                class(Configuration), intent(inout) :: self
+                character(len = 80), intent(in) :: paramTag
+                
+                integer :: i
+                logical :: found
+                
+                found = .false.
+                do i = 1, size(self%confMatrix%item)
+                    if (self%confMatrix%item(i)%item(1)%string == paramTag) then
+                        print *, paramTag, self%confMatrix%item(i)%item(2)%string, self%confMatrix%item(i)%item(3)%string
                         found = .true.
                     end if
                 end do
