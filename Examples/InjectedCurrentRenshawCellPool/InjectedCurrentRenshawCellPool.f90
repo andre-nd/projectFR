@@ -55,7 +55,13 @@ program InjectedCurrentRenshawCellPool
       
     t = [(dt*(i-1), i=1, timeLength)]
     
+    do j = 1, size(synapticNoisePools)
+        call synapticNoisePools(j)%reset()
+    end do
     
+    do j = 1, size(interneuronPools)
+        call interneuronPools(j)%reset()
+    end do
 
     call cpu_time(tic)
     do i = 1, size(t)        

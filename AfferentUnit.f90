@@ -1,6 +1,6 @@
 ! '''
 !     Neuromuscular simulator in Fortran.
-!     Copyright (C) 2018  Renato Naville Watanabe
+!     Copyright (C) 2019  Renato Naville Watanabe
 
 !     This program is free software: you can redistribute it and/or modify
 !     it under the terms of the GNU General Public License as published by
@@ -30,10 +30,12 @@ module AfferentUnitClass
     use CharacterMatrixClass
     use SynapsePointerClass
     use DynamicalArrays
+    use randomGen
+    
     implicit none
     private
-    integer, parameter :: wp = kind(1.0d0)
-    real(wp), parameter :: pi = 4 * atan(1.0_wp)    
+    !integer, parameter :: wp = kind(1.0d0)
+    !real(wp), parameter :: pi = 4 * atan(1.0_wp)    
     public :: AfferentUnit
 
     type AfferentUnit
@@ -60,7 +62,7 @@ module AfferentUnitClass
         real(wp) :: stimulusMeanFrequency_Hz, stimulusPulseDuration_ms, stimulusIntensity_mA
         real(wp) :: stimulusStop_ms, stimulusStart_ms, stimulusModulationStart_ms
         real(wp) :: stimulusModulationStop_ms
-        real(wp) :: position_mm
+        real(wp) :: position_mm, initialFiringRate
 
         contains
             procedure :: atualizeAfferentUnit
@@ -109,6 +111,8 @@ module AfferentUnitClass
             real(wp), dimension(:,:), allocatable :: GC, GL
             real(wp) :: dynamicNerveLength, distanceToTerminal, delayLength
             integer :: simDuration, NumberOfAxonNodes
+            real(wp) :: randNumber
+            integer :: N
             
             init_AfferentUnit%position_mm = 0.0
             ! ## Configuration object with the simulation parameters.
@@ -347,6 +351,14 @@ module AfferentUnitClass
             if (allocated(init_AfferentUnit%terminalSpikeTrain)) then
                 deallocate(init_AfferentUnit%terminalSpikeTrain)
             end if
+
+            ! Initial firing rate
+            
+            randNumber = randn()
+            init_AfferentUnit%initialFiringRate = 5.0 + 0.5*randNumber
+            if (init_AfferentUnit%initialFiringRate < 0.0) then
+                init_AfferentUnit%initialFiringRate = 0.0
+            end if
             
             paramTag = 'GammaOrder_' // trim(init_AfferentUnit%pool) // '-' // trim(init_AfferentUnit%muscle)
             paramChar = init_AfferentUnit%conf%parameterSet(paramTag, paramTag2, 0)
@@ -372,7 +384,6 @@ module AfferentUnitClass
             if (allocated(GL)) deallocate(GL)           
 
             
-
 
         end function 
 
@@ -508,11 +519,14 @@ module AfferentUnitClass
             class(AfferentUnit), intent(inout) :: self
             real(wp), intent(in) :: t
             integer :: simDuration
-            if (abs(t - self%Delay%terminalSpikeTrain) < 1e-3) then
-                call AddToList(self%terminalSpikeTrain,t)
-                call self%transmitSpikes(t)
-            end if
             
+            if (allocated(self%Delay%orthodromicSpikeTrainStimTerminal)) then
+                if (abs(t - self%Delay%orthodromicSpikeTrainStimTerminal(self%Delay%indexOrthodromicSpikeStimTerminal)) < 1e-3) then
+                    call AddToList(self%terminalSpikeTrain,t)
+                    self%Delay%indexOrthodromicSpikeStimTerminal = self%Delay%indexOrthodromicSpikeStimTerminal + 1 
+                    call self%transmitSpikes(t)
+                end if
+            end if            
 
             if (self%stimulusCompartment == -1) then
                 simDuration = nint(t/self%conf%timeStep_ms) + 1
@@ -636,7 +650,7 @@ module AfferentUnitClass
             if (allocated(self%terminalSpikeTrain)) deallocate(self%terminalSpikeTrain)
             
             call self%spikesGenerator%reset()
-
+            
             
         end subroutine
 

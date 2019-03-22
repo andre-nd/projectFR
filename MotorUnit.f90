@@ -721,7 +721,7 @@ module MotorUnitClass
         ! ## Vector with the instants of spikes at the terminal.
         if (allocated(self%terminalSpikeTrain)) deallocate(self%terminalSpikeTrain)
 
-        
+        !print *, self%pool, self%index
     end subroutine
 
     subroutine createStimulus(self)
@@ -767,9 +767,7 @@ module MotorUnitClass
         
         paramTag = 'stimModulation_' // trim(self%nerve)
         paramChar = self%conf%parameterSet(paramTag, self%pool, self%index)
-        read(paramChar, *)self%axonStimModulation
-        
-        
+        read(paramChar, *)self%axonStimModulation        
         
         startStep = nint(self%stimulusStart_ms / self%conf%timeStep_ms)
         

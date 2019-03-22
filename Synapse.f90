@@ -216,33 +216,33 @@ module SynapseClass
             class(Synapse), intent(inout) :: self
             real(wp), intent(in) :: t, V_mV
 
-            if (.not.allocated(self%tEndOfPulse)) then
-                allocate(self%tBeginOfPulse(size(self%gmax_muS)))
-                self%tBeginOfPulse(:) = -1e4
+            ! if (.not.allocated(self%tEndOfPulse)) then
+            !     allocate(self%tBeginOfPulse(size(self%gmax_muS)))
+            !     self%tBeginOfPulse(:) = -1e4
                 
-                allocate(self%tEndOfPulse(size(self%gmax_muS)))
-                self%tEndOfPulse(:) = -1e4
+            !     allocate(self%tEndOfPulse(size(self%gmax_muS)))
+            !     self%tEndOfPulse(:) = -1e4
                 
-                allocate(self%tLastPulse(size(self%gmax_muS)))
-                self%tLastPulse(:) = -1e4
+            !     allocate(self%tLastPulse(size(self%gmax_muS)))
+            !     self%tLastPulse(:) = -1e4
 
-                allocate(self%conductanceState(size(self%gmax_muS)))
-                self%conductanceState(:) = .false.
+            !     allocate(self%conductanceState(size(self%gmax_muS)))
+            !     self%conductanceState(:) = .false.
 
-                allocate(self%ri(size(self%gmax_muS)))
-                self%ri(:) = 0.0
+            !     allocate(self%ri(size(self%gmax_muS)))
+            !     self%ri(:) = 0.0
 
-                allocate(self%ti(size(self%gmax_muS)))
-                self%ti(:) = 0.0
+            !     allocate(self%ti(size(self%gmax_muS)))
+            !     self%ti(:) = 0.0
                 
-                allocate(self%dynamicGmax(size(self%gmax_muS)))
-                self%dynamicGmax(:) = self%gmax_muS
+            !     allocate(self%dynamicGmax(size(self%gmax_muS)))
+            !     self%dynamicGmax(:) = self%gmax_muS
                 
-                allocate(self%synContrib(size(self%gmax_muS)))
-                self%synContrib = self%gmax_muS / self%gMaxTot_muS
-                !self%computeCurrent => self%computeCurrent2
+            !     allocate(self%synContrib(size(self%gmax_muS)))
+            !     self%synContrib = self%gmax_muS / self%gMaxTot_muS
+            !     !self%computeCurrent => self%computeCurrent2
                 
-            end if
+            ! end if
             
             current = self%computeConductance(t) * (self%EqPot_mV - V_mV)
         end function   
@@ -276,9 +276,9 @@ module SynapseClass
             logical :: continueFlag
             integer :: newPulse
 
-            self%Ron = self%Ron * exp(-(t-self%lastUpdateInstant) / self%tauOn) + &
-                       self%Non * self%rInf * (1.0 - exp(-(t-self%lastUpdateInstant) / self%tauOn))
-            self%Roff = self%Roff*(exp(-(t-self%lastUpdateInstant) / self%tauOff))
+            self%Ron = self%Ron * exp((self%lastUpdateInstant-t) / self%tauOn) + &
+                       self%Non * self%rInf * (1.0 - exp((self%lastUpdateInstant-t) / self%tauOn))
+            self%Roff = self%Roff*(exp((self%lastUpdateInstant-t) / self%tauOff))
             self%lastUpdateInstant = t
             
             if (allocated(idxBeginPulse)) deallocate(idxBeginPulse)
@@ -406,7 +406,6 @@ module SynapseClass
             class(Synapse), intent(inout) :: self
             real(wp), intent(in) :: t
             integer, intent(in) :: synapseNumber
-
             
             
             self%tBeginOfPulse(synapseNumber) = t + self%delay_ms(synapseNumber)
@@ -457,8 +456,21 @@ module SynapseClass
             ! '''
             class(Synapse), intent(inout) :: self
             
+            
+            if (.not.allocated(self%tEndOfPulse)) then
+                allocate(self%tBeginOfPulse(self%numberOfIncomingSynapses))               
+                allocate(self%tEndOfPulse(self%numberOfIncomingSynapses))                
+                allocate(self%tLastPulse(self%numberOfIncomingSynapses))
+                allocate(self%conductanceState(self%numberOfIncomingSynapses))
+                allocate(self%ri(self%numberOfIncomingSynapses))
+                allocate(self%ti(self%numberOfIncomingSynapses))               
+                allocate(self%dynamicGmax(self%numberOfIncomingSynapses))                
+                allocate(self%synContrib(self%numberOfIncomingSynapses))                
+            end if
+            
             call self%inQueue%clear()
             call self%outQueue%clear()
+
             if (self%numberOfIncomingSynapses > 0) then
                 self%tBeginOfPulse(:) = -1e4
                 self%tEndOfPulse(:) = -1e4

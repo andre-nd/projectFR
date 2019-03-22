@@ -1,6 +1,6 @@
 ! '''
 !     Neuromuscular simulator in Fortran.
-!     Copyright (C) 2018  Renato Naville Watanabe
+!     Copyright (C) 2019  Renato Naville Watanabe
 
 !     This program is free software: you can redistribute it and/or modify
 !     it under the terms of the GNU General Public License as published by
@@ -128,10 +128,15 @@ module AfferentPoolClass
             real(wp) :: frequency            
 
             do i = 1, self%AFnumber
-                frequency = proprioceptorFR - self%unit(i)%frequencyThreshold_Hz + 5.0_wp
-                if (frequency < 5.0) then 
+                if (proprioceptorFR >= self%unit(i)%frequencyThreshold_Hz) then 
+                    frequency = proprioceptorFR - self%unit(i)%frequencyThreshold_Hz + self%unit(i)%initialFiringRate
+                else
                     frequency = 0.0_wp
-                end if
+                end if               
+                ! if (i == 100) then
+                !     print *, frequency, proprioceptorFR, self%unit(i)%frequencyThreshold_Hz
+                ! end if
+                
                 call self%unit(i)%atualizeAfferentUnit(t, frequency*self%conf%timeStep_ms/1000.0)
             end do
         end subroutine
@@ -206,6 +211,8 @@ module AfferentPoolClass
             do i = 1, self%AFnumber
                 call self%unit(i)%reset()
             end do
+
+            print '(A)', 'Afferent Pool reseted'
         end subroutine
 
 

@@ -1083,8 +1083,8 @@ module SynapsesFactoryModule
                                                             if (declineFactor<1e5) then
                                                                 neuronsDistance = abs(interneuronPools(poolIn)%&
                                                                                 unit(unitIn)%position_mm &
-                                                                            - afferentPools(poolOut)%&
-                                                                            unit(unitOut)%position_mm)
+                                                                                - afferentPools(poolOut)%&
+                                                                                unit(unitOut)%position_mm)
                                                                 weight = declineFactor / (declineFactor + neuronsDistance**2)
                                                                 gmax = gmax * weight
                                                             end if
@@ -1093,8 +1093,7 @@ module SynapsesFactoryModule
                                                             addConductance(gmax, delay, dyn, var, tau)
                                                             
                                                             if (allocated(afferentPools(poolOut)%&
-                                                                unit(unitOut)%transmitSpikesThroughSynapses)) then
-                                                                
+                                                                unit(unitOut)%transmitSpikesThroughSynapses)) then                                                                
                                                                 
                                                                 allocate(tempTransmitSpikes(size(afferentPools(poolOut)%&
                                                                     unit(unitOut)%transmitSpikesThroughSynapses)))

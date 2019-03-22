@@ -66,6 +66,14 @@ program IsometricClosedLoop
     FR = 1000.0/12.0
     GammaOrder = 10
     
+    do j = 1, size(neuralTractPools)
+        call neuralTractPools(j)%reset()
+    end do
+    do j = 1, size(motorUnitPools)
+        call motorUnitPools(j)%reset()
+        call afferentPools(j)%reset()
+    end do
+
     call cpu_time(tic)
     do i = 2, size(t)
         angle = 0.1*sin(2*pi*t(i)/1000.0)    

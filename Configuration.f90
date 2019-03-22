@@ -196,13 +196,19 @@ module ConfigurationClass
                 character(len=50), intent(in) ::paramTag
                 logical :: distribute, wholePool
                 real(wp), dimension(:), allocatable :: indexUnits
+                logical :: found
                 
+                found = .false.
                 distribute = .true.
                 wholePool = .false.
                 MUnumber_S = 0
                 MUnumber_FR = 0
                 MUnumber_FF = 0
                 Nnumber = 0              
+                
+
+                
+                
                 
                 do k = 1, size(self%confMatrix%item)
                     param1 = self%confMatrix%item(k)%item(1)%string
@@ -240,6 +246,7 @@ module ConfigurationClass
                     if (trim(param1)==trim(paramTag)) then 
                         requestedParamater = param2
                         distribute = .false.
+                        found = .true.
                     else if (trim(self%MUParameterDistribution)=='linear') then     
                         if (trim(param1).eq.(trim(paramTag) // ':' // trim(pool) // '-S')) then
                             if (MUnumber_S>0) allocate(paramVec_S(MUnumber_S))
@@ -252,16 +259,19 @@ module ConfigurationClass
                             read(param2,*)param2Real
                             read(param3,*)param3Real
                             paramVec_FR = [((param3Real-param2Real)/(MUnumber_FR+1)*(i-1)+param2Real, i=1, MUnumber_FR)]                                    
+                            found = .true.
                         else if (trim(param1).eq.(trim(paramTag) // ':' // trim(pool) // '-FF')) then
                             if (MUnumber_FF>0) allocate(paramVec_FF(MUnumber_FF))
                             read(param2,*)param2Real
                             read(param3,*)param3Real
                             paramVec_FF = [((param3Real-param2Real)/(MUnumber_FF+1)*(i-1)+param2Real, i=1, MUnumber_FF)]                                    
+                            found = .true.
                         else if (trim(param1).eq.(trim(paramTag) // ':' // trim(pool) // '-')) then
                             read(param2,*)param2Real
                             read(param3,*)param3Real
                             paramVec = [((param3Real-param2Real)/(Nnumber+1)*(i-1) + param2Real, i=1, Nnumber)]                                     
                             wholePool = .true.
+                            found = .true.
                         end if
                     else if (self%MUParameterDistribution == 'exponential') then                         
                         indexUnits = [(i-1, i = 1, Nnumber)]
@@ -270,20 +280,24 @@ module ConfigurationClass
                             read(param2,*)param2Real
                             read(param3,*)param3Real
                             paramVec_S = [param2Real, param3Real]
+                            found = .true.
                         else if (trim(param1).eq.(trim(paramTag) // ':' // trim(pool) // '-FR')) then
                             allocate(paramVec_FR(2))
                             read(param2,*)param2Real
                             read(param3,*)param3Real
                             paramVec_FR = [param2Real, param3Real]
+                            found = .true.
                         else if (trim(param1).eq.(trim(paramTag) // ':' // trim(pool) // '-FF')) then
                             allocate(paramVec_FF(2))
                             read(param2,*)param2Real
                             read(param3,*)param3Real
                             paramVec_FF = [param2Real, param3Real]
+                            found = .true.
                         else if (trim(param1).eq.(trim(paramTag) // ':' // trim(pool) // '-')) then
                             read(param2,*)param2Real
                             read(param3,*)param3Real
                             distribute = .false.
+                            found = .true.
                             if (abs(param2Real)>1e-10) then
                                 paramVec = param2Real*exp(1.0/Nnumber*log(param3Real/param2Real) * indexUnits)
                             else 
@@ -318,6 +332,14 @@ module ConfigurationClass
                     end if
                 end if
 
+                                ! In case the parameter did not match any tag
+                if (.not.found) then
+                    print *, "Following parameter tag was not found on configuration file:"
+                    print *, paramTag, pool
+                    stop 1
+                end if
+
+
                 if (allocated(paramVec)) deallocate(paramVec)
                 if (allocated(paramVec_S)) deallocate(paramVec_S)
                 if (allocated(paramVec_FF)) deallocate(paramVec_FF)
@@ -337,7 +359,7 @@ module ConfigurationClass
                 class(Configuration), intent(inout) :: self
                 character(len=80), intent(in) :: neuralSource
                 character(len=80) :: line, param1, param2, param3, paramTag, param
-                integer :: ierr, il, j, i, stop1, pos, posUnitKind, posComp, posKind, k
+                integer :: il, j, i, stop1, pos, posUnitKind, posComp, posKind, k
                 real(wp) :: paramReal
                 type(CharacterArray) :: newSynapse 
                 

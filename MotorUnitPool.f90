@@ -334,7 +334,9 @@ module MotorUnitPoolClass
         class(MotorUnitPool) , intent(inout), target:: self
         real(wp), intent(in) :: t
         real(wp), intent(in) :: dynGamma, statGamma
-        real(wp), dimension(:), allocatable :: k1, k2, k3, k4
+        real(wp), dimension(:), allocatable :: k1, k2, k3, k4, newStateTemp
+        real(wp), dimension(:), allocatable :: vUnit
+        real(wp) :: newtTemp
         integer :: i
         real(wp) :: vmax, vmin
         real(wp) :: length, velocity, acceleration, tendonForce
@@ -343,22 +345,30 @@ module MotorUnitPoolClass
         allocate(k2(self%totalNumberOfCompartments))
         allocate(k3(self%totalNumberOfCompartments))
         allocate(k4(self%totalNumberOfCompartments))
+        allocate(newStateTemp(self%totalNumberOfCompartments))
         
         vmin = -30.0
         vmax = 120.0
 
-        k1 = self%dVdt(t, self%v_mV)
-        k2 = self%dVdt(t + self%conf%timeStepByTwo_ms, self%v_mV + self%conf%timeStepByTwo_ms * k1)
-        k3 = self%dVdt(t + self%conf%timeStepByTwo_ms, self%v_mV + self%conf%timeStepByTwo_ms * k2)
-        k4 = self%dVdt(t + self%conf%timeStep_ms, self%v_mV + self%conf%timeStep_ms * k3)
+        k1 = self%dVdt(t, self%v_mV)        
+            newStateTemp = self%v_mV + self%conf%timeStepByTwo_ms * k1
+            newtTemp = t + self%conf%timeStepByTwo_ms
+            k2 = self%dVdt(newtTemp, newStateTemp)
+            newStateTemp = self%v_mV + self%conf%timeStepByTwo_ms * k2
+            k3 = self%dVdt(newtTemp, newStateTemp)
+            newStateTemp = self%v_mV + self%conf%timeStep_ms * k3
+            newtTemp = t + self%conf%timeStep_ms
+            k4 = self%dVdt(newtTemp, newStateTemp)
                 
-        self%v_mV = self%v_mV + self%conf%timeStepBySix_ms * (k1+ 2*k2 + 2*k3 + k4)
+        self%v_mV = self%v_mV + self%conf%timeStepBySix_ms * (k1+ 2.0*k2 + 2.0*k3 + k4)
         
         self%v_mV = merge(self%v_mV, vmax, self%v_mV < vmax)
         self%v_mV = merge(self%v_mV, vmin, self%v_mV > vmin)
         
+        allocate(vUnit(self%unit(1)%compNumber))
         do i = 1, self%MUnumber
-            call self%unit(i)%atualizeMotorUnit(t, self%v_mV((i-1)*self%unit(i)%compNumber+1:i*self%unit(i)%compNumber))
+            vUnit = self%v_mV((i-1)*self%unit(i)%compNumber+1:i*self%unit(i)%compNumber)
+            call self%unit(i)%atualizeMotorUnit(t, vUnit)
         end do
         
         self%Activation%unit => self%unit(:)
@@ -369,13 +379,13 @@ module MotorUnitPoolClass
             length = self%NoHillMuscle%lengthNorm
             velocity = self%NoHillMuscle%velocityNorm
             acceleration = self%NoHillMuscle%accelerationNorm
-            tendonForce = self%NoHillMuscle%force(nint(t/self%conf%timeStep_ms))
+            tendonForce = self%NoHillMuscle%force(nint(t/self%conf%timeStep_ms)+1)
         else
             call self%HillMuscle%atualizeForce(self%Activation%activation_Sat)
             length = self%HillMuscle%lengthNorm
             velocity = self%HillMuscle%velocityNorm
             acceleration = self%HillMuscle%accelerationNorm
-            tendonForce = self%HillMuscle%tendonForce_N(nint(t/self%conf%timeStep_ms))
+            tendonForce = self%HillMuscle%tendonForce_N(nint(t/self%conf%timeStep_ms)+1)
         end if
         
         call self%spindle%atualizeMuscleSpindle(t, length,&
@@ -390,6 +400,7 @@ module MotorUnitPoolClass
         deallocate(k2)
         deallocate(k3)
         deallocate(k4)
+        deallocate(vUnit)
     end subroutine
 
     subroutine listSpikes(self)
@@ -423,9 +434,7 @@ module MotorUnitPoolClass
 
         numberOfSpikesSoma = sum(numberOfNewSpikesSoma)
         numberOfSpikesTerminal = sum(numberOfNewSpikesTerminal)
-        numberOfSpikesLastComp = sum(numberOfNewSpikesLastComp)
-
-        
+        numberOfSpikesLastComp = sum(numberOfNewSpikesLastComp)       
         
         allocate(self%poolSomaSpikes(numberOfSpikesSoma,2))        
         allocate(self%poolLastCompSpikes(numberOfSpikesLastComp,2))
@@ -522,7 +531,6 @@ module MotorUnitPoolClass
         end if
         call self%spindle%reset()
         print *, 'Motorneuron Pool reseted'
-        ! read(*,*)
     end subroutine
 
 

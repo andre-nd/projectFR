@@ -567,6 +567,11 @@ module MuscleHillClass
 
         subroutine atualizeMusculoTendonLength(self, ankleAngle)
             ! '''
+            ! Computes the musculotendon complex length.
+            !
+            ! Inputs:
+            !
+            ! * ankleAngle - the angle of the ankle, in degrees (real).
             ! '''
             class(MuscleHill), intent(inout) :: self
             real(wp), intent(in) :: ankleAngle
@@ -578,6 +583,11 @@ module MuscleHillClass
 
         subroutine atualizeMomentArm(self, ankleAngle)
             ! '''
+            ! Computes the moment-arm of the muscle.
+            !
+            ! Inputs:
+            !
+            ! * ankleAngle - the angle of the ankle, in degrees (real).
             ! '''
             class(MuscleHill), intent(inout) :: self
             real(wp), intent(in) :: ankleAngle

@@ -278,7 +278,7 @@ module InterneuronClass
         integer :: i
 
         self%tSomaSpike = -1e6
-        self%v_mV(:) = 0.0
+        
         do i = 1, self%compNumber
             self%v_mV(i) = self%Compartments(i)%EqPot_mV
             call self%Compartments(i)%reset()
@@ -287,9 +287,9 @@ module InterneuronClass
         self%iIonic(:) = 0.0
         self%iInjected(:) = 0.0
 
-        if (allocated(self%somaSpikeTrain)) deallocate(self%somaSpikeTrain)
-
+        if (allocated(self%somaSpikeTrain)) deallocate(self%somaSpikeTrain)       
         
+        !print *, self%pool, self%index
         
     end subroutine
 

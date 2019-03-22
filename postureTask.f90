@@ -1,6 +1,6 @@
 ! '''
 !     Neuromuscular simulator in Fortran.
-!     Copyright (C) 2018  Renato Naville Watanabe
+!     Copyright (C) 2019  Renato Naville Watanabe
 
 !     This program is free software: you can redistribute it and/or modify
 !     it under the terms of the GNU General Public License as published by
@@ -68,7 +68,7 @@ module postureTaskClass
             ! ##
             timeLength = nint(conf%simDuration_ms/conf%timeStep_ms)
             allocate(init_postureTask%ankleAngle_rad(timeLength))
-            init_postureTask%ankleAngle_rad(:) = 0.0
+            init_postureTask%ankleAngle_rad(:) = 5.0*pi/180.0
             allocate(init_postureTask%ankleTorque_Nm(timeLength))
             init_postureTask%ankleTorque_Nm(:) = 0.0
             allocate(init_postureTask%ankleOmega_rad_s(timeLength))
@@ -79,8 +79,6 @@ module postureTaskClass
 
             init_postureTask%momentOfInertia = 4.0*(init_postureTask%mass*init_postureTask%height**2)/3.0
 
-            init_postureTask%ankleAngle_rad(1) = 5.0*pi/180.0
-
             print '(A)', 'Posture Task built'
 
         end function 
@@ -88,29 +86,40 @@ module postureTaskClass
         subroutine atualizeBody(self, t)
             ! '''
             ! Update the ankle joint.
+            ! Atualizes the musculotendon length and the moment-arm of each muscle.
+            ! Updates the angle and angular velocity by numerically solving 
+            ! the differential equations with the Euler method.
+            ! 
+            ! Inputs:
+            !
+            ! * t: real 
+            ! 
             
             class(postureTask), intent(inout) :: self
             real(wp), intent(in) ::t
             integer :: i, timeIndex
-            real(wp) :: dthetadt, domegadt
+            real(wp) :: dthetadt, domegadt, angle
+
 
             timeIndex = nint(t/self%conf%timeStep_ms)+1
             
+            angle = self%ankleAngle_rad(timeIndex)*180/pi
             if (self%muscles(1)%muscle%hillModel == 'No') then
                 do i = 1, size(self%muscles)
-                    call self%muscles(i)%muscle%NoHillMuscle%atualizeMusculoTendonLength(self%ankleOmega_rad_s(timeIndex))
-                    call self%muscles(i)%muscle%NoHillMuscle%atualizeMomentArm(self%ankleOmega_rad_s(timeIndex))
+                    
+                    call self%muscles(i)%muscle%NoHillMuscle%atualizeMusculoTendonLength(angle)
+                    call self%muscles(i)%muscle%NoHillMuscle%atualizeMomentArm(angle)
                 end do
             else 
                 do i = 1, size(self%muscles)
-                    call self%muscles(i)%muscle%HillMuscle%atualizeMusculoTendonLength(self%ankleOmega_rad_s(timeIndex))
-                    call self%muscles(i)%muscle%HillMuscle%atualizeMomentArm(self%ankleOmega_rad_s(timeIndex))
+                    call self%muscles(i)%muscle%HillMuscle%atualizeMusculoTendonLength(angle)
+                    call self%muscles(i)%muscle%HillMuscle%atualizeMomentArm(angle)
                 end do
             end if
             
             call self%computeTorque(t)
 
-            if (t > 2000.0) then
+            if (t > 1000.0) then
                 dthetadt = self%ankleOmega_rad_s(timeIndex)
                 domegadt = self%ankleTorque_Nm(timeIndex)/self%momentOfInertia
                 self%ankleOmega_rad_s(timeIndex + 1) = self%ankleOmega_rad_s(timeIndex) + &

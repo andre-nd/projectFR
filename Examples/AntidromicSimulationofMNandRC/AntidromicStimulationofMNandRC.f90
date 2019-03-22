@@ -1,6 +1,6 @@
 ! '''
 !     Neuromuscular simulator in Fortran.
-!     Copyright (C) 2018  Renato Naville Watanabe
+!     Copyright (C) 2019  Renato Naville Watanabe
 !                         Pablo Alejandro    
 !     This program is free software: you can redistribute it and/or modify
 !     it under the terms of the GNU General Public License as published by
@@ -85,6 +85,21 @@ program AntidromicStimulationofMNandRC
       
     t = [(dt*(i-1), i=1, timeLength)]
     
+    do j = 1, size(motorUnitPools)
+        call motorUnitPools(j)%reset()
+    end do
+
+    do j = 1, size(interneuronPools)
+        call interneuronPools(j)%reset()
+    end do
+
+    do j = 1, size(synapticNoisePools)
+        call synapticNoisePools(j)%reset()
+    end do
+
+      
+
+     
 
     call cpu_time(tic)
     do i = 1, size(t)        

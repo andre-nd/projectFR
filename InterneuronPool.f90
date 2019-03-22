@@ -127,6 +127,7 @@ module InterneuronPoolClass
             init_InterNeuronPool%iInjected(:) = 0.0
             init_InterNeuronPool%iIonic(:) = 0.0
             ! # Retrieving data from Interneuron class
+            init_InterNeuronPool%G(:,:) = 0.0
             do i = 1, init_InterNeuronPool%Nnumber
                 init_InterNeuronPool%v_mV((i-1)*init_InterNeuronPool%unit(i)%compNumber+1:&
                                                     i*init_InterNeuronPool%unit(i)%compNumber) =&
@@ -201,6 +202,9 @@ module InterneuronPoolClass
             class(InterneuronPool), intent(inout) :: self
             real(wp), intent(in) :: t
             real(wp), dimension(self%totalNumberOfCompartments) :: k1, k2, k3, k4
+            real(wp), dimension(self%totalNumberOfCompartments) :: newStateTemp
+            real(wp), dimension(:), allocatable :: vUnit
+            real(wp) :: newtTemp
             integer :: i
             real(wp) :: vmax, vmin
             
@@ -208,19 +212,24 @@ module InterneuronPoolClass
             vmax = 120.0      
 
             k1 = self%dVdt(t, self%v_mV)        
-            k2 = self%dVdt(t + self%conf%timeStepByTwo_ms, self%v_mV + self%conf%timeStepByTwo_ms * k1)
-            k3 = self%dVdt(t + self%conf%timeStepByTwo_ms, self%v_mV + self%conf%timeStepByTwo_ms * k2)
-            k4 = self%dVdt(t + self%conf%timeStep_ms, self%v_mV + self%conf%timeStep_ms * k3)
+            newStateTemp = self%v_mV + self%conf%timeStepByTwo_ms * k1
+            newtTemp = t + self%conf%timeStepByTwo_ms
+            k2 = self%dVdt(newtTemp, newStateTemp)
+            newStateTemp = self%v_mV + self%conf%timeStepByTwo_ms * k2
+            k3 = self%dVdt(newtTemp, newStateTemp)
+            newStateTemp = self%v_mV + self%conf%timeStep_ms * k3
+            newtTemp = t + self%conf%timeStep_ms
+            k4 = self%dVdt(newtTemp, newStateTemp)
             
-            self%v_mV = self%v_mV + self%conf%timeStepBySix_ms * (k1+ 2.0*k2 + 2.0*k3 + k4)
+            self%v_mV = self%v_mV + self%conf%timeStepBySix_ms * (k1 + 2.0*k2 + 2.0*k3 + k4)
 
-            self%v_mV = merge(self%v_mV, vmax, self%v_mV.lt.vmax)
-            self%v_mV = merge(self%v_mV, vmin, self%v_mV.gt.vmin)
+            self%v_mV = merge(self%v_mV, vmax, self%v_mV < vmax)
+            self%v_mV = merge(self%v_mV, vmin, self%v_mV > vmin)
 
-
+            allocate(vUnit(self%unit(1)%compNumber))
             do i = 1, self%Nnumber
-                call self%unit(i)%atualizeInterneuron(t, self%v_mV((i-1)*self%unit(i)%compNumber+1:&
-                                                                i*self%unit(i)%compNumber))
+                vUnit = self%v_mV((i-1)*self%unit(i)%compNumber+1:i*self%unit(i)%compNumber)
+                call self%unit(i)%atualizeInterneuron(t, vUnit)
             end do
         end subroutine
     
@@ -257,10 +266,8 @@ module InterneuronPoolClass
                                    self%spBeta, &
                                    matInt)
 
-            !matInt = matmul(self%G, V)
+            ! matInt = matmul(self%G, V)
             
-            
-
             dVdt =  (self%iIonic + matInt + self%iInjected + self%EqCurrent_nA) * &
                     self%capacitanceInv
             stat = mkl_sparse_destroy(self%GSp)

@@ -104,7 +104,9 @@ program HReflexMWave
             call afferentPools(2)%unit(i)%createStimulus()
         end do
 
-        
+        call motorUnitPools(1)%reset()
+        call afferentPools(1)%reset()
+        call afferentPools(2)%reset()
         spindleFR = 0.0
         call cpu_time(tic)
         do i = 1, timeLength

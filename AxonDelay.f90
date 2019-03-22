@@ -37,8 +37,10 @@ module AxonDelayClass
         real(wp) :: latencySpinalTerminal_ms, latencyStimulusTerminal_ms
         real(wp) :: terminalSpikeTrain, axonSpikeTrain
         real(wp), dimension(:), allocatable :: orthodromicSpikeTrain, antidromicSpikeTrain
-        integer :: indexOrthodromicSpike, indexAntidromicSpike
+        real(wp), dimension(:), allocatable :: orthodromicSpikeTrainStimTerminal
+        integer :: indexOrthodromicSpike, indexAntidromicSpike, indexOrthodromicSpikeStimTerminal
         real(wp) :: electricCharge_muC, threshold_muC, refractoryPeriod_ms, leakageTimeConstant_ms
+        character(len = 6) :: pool
 
         contains
             procedure :: atualizeStimulus
@@ -84,7 +86,7 @@ module AxonDelayClass
         character(len=80) :: paramTag, paramChar
 
         init_AxonDelay%conf => conf
-
+        init_AxonDelay%pool = pool
         ! ## Integer corresponding to the motor unit order in the pool, according to 
         ! ## the Henneman's principle (size principle).
         init_AxonDelay%index = index
@@ -102,16 +104,17 @@ module AxonDelayClass
             init_AxonDelay%conf%timeStep_ms
         ! ## time, in ms, that the signal takes to travel between the spinal cord and the terminal.
         init_AxonDelay%latencySpinalTerminal_ms = nint((init_AxonDelay%length_m)/&
-            init_AxonDelay%velocity_m_s*1000.0/init_AxonDelay%conf%timeStep_ms) * init_AxonDelay%conf%timeStep_ms
-        ! ## time, in ms, tat the signal takes to travel between the stimulus and the terminal.
+            init_AxonDelay%velocity_m_s/init_AxonDelay%conf%timeStep_ms*1000.0) * init_AxonDelay%conf%timeStep_ms
+        ! ## time, in ms, that the signal takes to travel between the stimulus and the terminal.
         init_AxonDelay%latencyStimulusTerminal_ms = nint((stimulusPositiontoTerminal)/&
-            init_AxonDelay%velocity_m_s*1000.0/init_AxonDelay%conf%timeStep_ms) * init_AxonDelay%conf%timeStep_ms
+            init_AxonDelay%velocity_m_s/init_AxonDelay%conf%timeStep_ms*1000.0) * init_AxonDelay%conf%timeStep_ms
 
         ! ## Float with instant, in ms, of the last spike in the terminal. 
         init_AxonDelay%terminalSpikeTrain = -1e6
         init_AxonDelay%axonSpikeTrain = -1e6
         
         init_AxonDelay%indexOrthodromicSpike = 1
+        init_AxonDelay%indexOrthodromicSpikeStimTerminal = 1
         init_AxonDelay%indexAntidromicSpike = 1
 
         init_AxonDelay%electricCharge_muC = 0
@@ -143,6 +146,7 @@ module AxonDelayClass
         real(wp), intent(in) :: t, latency
 
         self%terminalSpikeTrain = t + latency
+        call AddToList(self%orthodromicSpikeTrainStimTerminal, self%terminalSpikeTrain)
     end subroutine
 
     subroutine addSpinalSpike(self, t)
@@ -158,7 +162,6 @@ module AxonDelayClass
         real(wp) :: timeInSpinalCord
 
         timeInSpinalCord = t + self%latencyStimulusSpinal_ms
-
         call AddToList(self%orthodromicSpikeTrain, timeInSpinalCord)
     end subroutine
 
@@ -245,7 +248,10 @@ module AxonDelayClass
 
         if (allocated(self%orthodromicSpikeTrain)) deallocate(self%orthodromicSpikeTrain)
         if (allocated(self%antidromicSpikeTrain)) deallocate(self%antidromicSpikeTrain)
+        if (allocated(self%orthodromicSpikeTrainStimTerminal)) deallocate(self%orthodromicSpikeTrainStimTerminal)
+
         self%indexOrthodromicSpike = 1
+        self%indexOrthodromicSpikeStimTerminal = 1
         self%indexAntidromicSpike = 1
     end subroutine       
 end module AxonDelayClass
