@@ -29,10 +29,11 @@ module MotorUnitClass
     use DynamicalArrays
     use CharacterMatrixClass
     use SynapsePointerClass
+    use randomGen
     implicit none
     private
-    integer, parameter :: wp = kind(1.0d0)
-    real(wp), parameter :: pi = 4 * atan(1.0_wp)    
+    ! integer, parameter :: wp = kind(1.0d0)
+    ! real(wp), parameter :: pi = 4 * atan(1.0_wp)    
     public :: MotorUnit
 
     type MotorUnit
@@ -196,12 +197,14 @@ module MotorUnitClass
         paramTag = 'EMGAmplitude'
         paramChar =  init_MotorUnit%conf%parameterSet(paramTag, pool, index)
         read(paramChar, *)init_MotorUnit%ampEMG_mV
+        init_MotorUnit%ampEMG_mV = (1+0.05*randn())*init_MotorUnit%ampEMG_mV
         init_MotorUnit%ampEMG_mV = init_MotorUnit%ampEMG_mV * init_MotorUnit%attenuationToSkin
 
         ! ## MUAP time constant, in ms.
         paramTag = 'EMGDuration'
         paramChar =  init_MotorUnit%conf%parameterSet(paramTag, pool, index)
         read(paramChar, *)init_MotorUnit%timeCteEMG_ms
+        init_MotorUnit%timeCteEMG_ms = (1+0.05*randn())*init_MotorUnit%timeCteEMG_ms
         init_MotorUnit%timeCteEMG_ms = init_MotorUnit%timeCteEMG_ms * init_MotorUnit%timeWidening
         
         ! ## Number of compartments.

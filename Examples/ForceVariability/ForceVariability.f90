@@ -10,6 +10,7 @@ program ForceVariability
     use jointAnkleForceTaskClass
     use AfferentPoolClass
     implicit none 
+    include 'mkl.fi'
     !integer, parameter :: wp = kind(1.0d0)
     type(Configuration) :: conf
     real(wp), parameter :: pi = 4 * atan(1.0_wp)    
@@ -118,7 +119,14 @@ program ForceVariability
                                             afferentPools)
         
         do l = 1,  size(FR)
-            call cpu_time(tic)
+            tic =  dsecnd()
+            do j = 1, size(neuralTractPools)
+                call neuralTractPools(j)%reset()
+            end do            
+            do j = 1, 3
+                call motorUnitPools(j)%reset()
+            end do            
+            call ankle%reset()
             do i = 1, size(t)
                 angle = 0.0
                 call ankle%atualizeAnkle(t(i), angle)  
@@ -133,7 +141,7 @@ program ForceVariability
                 end do
                 call ankle%computeTorque(t(i))                
             end do    
-            call cpu_time(toc)
+            toc =  dsecnd()
 
             print '(F15.6, A)', toc - tic, ' seconds'
             
@@ -220,13 +228,7 @@ program ForceVariability
             ! end do
             ! close(1)
             
-            do j = 1, size(neuralTractPools)
-                call neuralTractPools(j)%reset()
-            end do            
-            do j = 1, 3
-                call motorUnitPools(j)%reset()
-            end do            
-            call ankle%reset()
+            
             
         end do
         deallocate(synapticNoisePools)

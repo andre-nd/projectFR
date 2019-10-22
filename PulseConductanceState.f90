@@ -95,7 +95,6 @@ module PulseConductanceStateClass
             paramChar = init_PulseConductanceState%conf%parameterSet(paramTag, pool, index)
             read(paramChar, *)init_PulseConductanceState%alpha_ms1
             
-
             paramTag = 'PulseDur_' // trim(stateKind)
             paramChar = init_PulseConductanceState%conf%parameterSet(paramTag, pool, index)
             read(paramChar, *)init_PulseConductanceState%PulseDur_ms    

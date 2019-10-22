@@ -106,13 +106,13 @@ module MuscularActivationClass
                 do i = 1, init_MuscularActivation%MUnumber
                     init_MuscularActivation%ActMatrix(i,3*(i-1)+1:3*(i-1)+3) = &
                                     [2*exp(-init_MuscularActivation%conf%timeStep_ms/&
-                                    init_MuscularActivation%unit(i)%TwitchTc_ms),&
-                                      -exp(-2*init_MuscularActivation%conf%timeStep_ms/&
-                                      init_MuscularActivation%unit(i)%TwitchTc_ms),& 
-                                       (init_MuscularActivation%conf%timeStep_ms**2)/&
-                                       init_MuscularActivation%unit(i)%TwitchTc_ms*&
-                                       exp(1.0-init_MuscularActivation%conf%timeStep_ms/&
-                                       init_MuscularActivation%unit(i)%TwitchTc_ms)]
+                                     init_MuscularActivation%unit(i)%TwitchTc_ms),&
+                                     -exp(-2*init_MuscularActivation%conf%timeStep_ms/&
+                                     init_MuscularActivation%unit(i)%TwitchTc_ms),& 
+                                     (init_MuscularActivation%conf%timeStep_ms**2)/&
+                                      init_MuscularActivation%unit(i)%TwitchTc_ms*&
+                                      exp(1.0-init_MuscularActivation%conf%timeStep_ms/&
+                                      init_MuscularActivation%unit(i)%TwitchTc_ms)]
                 end do
                 
                 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

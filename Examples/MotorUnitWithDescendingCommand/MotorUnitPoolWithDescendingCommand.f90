@@ -21,6 +21,7 @@ program MotorUnitPoolWithDescendingCommand
     integer :: timeLength
     integer :: i, j
     real(wp), dimension(:), allocatable :: t, MNv_mV
+    real(wp), dimension(:,:), allocatable :: unitsEMG
     real(wp) :: tic, toc
     type(gpf) :: gp
     real(wp) :: FR
@@ -39,7 +40,7 @@ program MotorUnitPoolWithDescendingCommand
     type(InterneuronPool), dimension(:), allocatable, target :: interneuronPools    
     type(SynapticNoise), dimension(:), allocatable:: synapticNoisePools     
     type(AfferentPool), dimension(:), allocatable:: afferentPools     
-
+    character(len = 80) :: muindex
     call init_random_seed()
 
     conf = Configuration(filename)
@@ -63,12 +64,17 @@ program MotorUnitPoolWithDescendingCommand
     allocate(t(timeLength))
     allocate(MNv_mV(timeLength))
 
+    do j = 1, size(neuralTractPools)
+        call neuralTractPools(j)%reset()
+    end do
+
+    call motorUnitPools(1)%reset()
     
       
     t = [(dt*(i-1), i=1, timeLength)]
     
-    FR = 185.0
-    GammaOrder = 2
+    FR = 60
+    GammaOrder = 10
 
     call cpu_time(tic)
     do i = 1, size(t)        
@@ -87,35 +93,47 @@ program MotorUnitPoolWithDescendingCommand
     call neuralTractPools(1)%listSpikes()
     call motorUnitPools(1)%listSpikes()
     call motorUnitPools(1)%getMotorUnitPoolEMG()
+    allocate(unitsEMG(20, size(t)))
+    do j = 1, size(t)
+        do i = 1, 20
+            unitsEMG(i,j) = motorUnitPools(1)%unit(i)%getEMG(t(j))
+        end do
+    end do
     
-    call gp%title('Membrane potential of the soma of the MN #15')
+    call gp%title('EMG')
     call gp%xlabel('t (ms))')
-    call gp%ylabel('Descending command index')
-    call gp%plot(t, MNv_mV, 'with line lw 2 lc rgb "#0008B0"')  
+    call gp%ylabel('EMG (mV)')
+    call gp%plot(t, motorUnitPools(1)%emg, 'with line lw 2 lc rgb "#0008B0"')  
 
+    do i = 1, 20
+        write(muindex, '(I3)')i
+        call gp%title('EMG' // muindex )
+        call gp%xlabel('t (ms))')
+        call gp%ylabel('EMG (mV)')
+        call gp%plot(t, unitsEMG(i,:), 'with line lw 2 lc rgb "#0008B0"')  
+    end do
+    
+    ! call gp%title('MN spike instants at the soma')
+    ! call gp%xlabel('t (s))')
+    ! call gp%ylabel('Motoneuron index')
+    ! call gp%plot(motorUnitPools(1)%poolSomaSpikes(:,1), motorUnitPools(1)%poolSomaSpikes(:,2), 'with points pt 5 lc rgb "#0008B0"')
 
-    call gp%title('MN spike instants at the soma')
-    call gp%xlabel('t (s))')
-    call gp%ylabel('Motoneuron index')
-    call gp%plot(motorUnitPools(1)%poolSomaSpikes(:,1), motorUnitPools(1)%poolSomaSpikes(:,2), 'with points pt 5 lc rgb "#0008B0"')
+    ! call gp%title('MN spike instants at the terminal')
+    ! call gp%xlabel('t (s))')
+    ! call gp%ylabel('Motoneuron index')
+    ! call gp%plot(motorUnitPools(1)%poolTerminalSpikes(:,1), &
+    ! motorUnitPools(1)%poolTerminalSpikes(:,2), 'with points pt 5 lc rgb "#0008B0"')
 
-    call gp%title('MN spike instants at the terminal')
-    call gp%xlabel('t (s))')
-    call gp%ylabel('Motoneuron index')
-    call gp%plot(motorUnitPools(1)%poolTerminalSpikes(:,1), &
-    motorUnitPools(1)%poolTerminalSpikes(:,2), 'with points pt 5 lc rgb "#0008B0"')
+    ! call gp%title('MN spike instants at the terminal')
+    ! call gp%xlabel('t (s))')
+    ! call gp%ylabel('Motoneuron index')
+    ! call gp%plot(neuralTractPools(1)%poolTerminalSpikes(:,1), &
+    ! neuralTractPools(1)%poolTerminalSpikes(:,2), 'with points pt 5 lc rgb "#0008B0"')
 
-    call gp%title('MN spike instants at the terminal')
-    call gp%xlabel('t (s))')
-    call gp%ylabel('Motoneuron index')
-    call gp%plot(neuralTractPools(1)%poolTerminalSpikes(:,1), &
-    neuralTractPools(1)%poolTerminalSpikes(:,2), 'with points pt 5 lc rgb "#0008B0"')
-
-
-    call gp%title('Muscle force')
-    call gp%xlabel('t (ms))')
-    call gp%ylabel('Force (N)')
-    call gp%plot(t, motorUnitPools(1)%NoHillMuscle%force, 'with line lw 2 lc rgb "#0008B0"')
+    ! call gp%title('Muscle force')
+    ! call gp%xlabel('t (ms))')
+    ! call gp%ylabel('Force (N)')
+    ! call gp%plot(t, motorUnitPools(1)%NoHillMuscle%force, 'with line lw 2 lc rgb "#0008B0"')
     
     
 end program MotorUnitPoolWithDescendingCommand

@@ -351,14 +351,9 @@ module MotorUnitPoolClass
         vmax = 120.0
 
         k1 = self%dVdt(t, self%v_mV)        
-            newStateTemp = self%v_mV + self%conf%timeStepByTwo_ms * k1
-            newtTemp = t + self%conf%timeStepByTwo_ms
-            k2 = self%dVdt(newtTemp, newStateTemp)
-            newStateTemp = self%v_mV + self%conf%timeStepByTwo_ms * k2
-            k3 = self%dVdt(newtTemp, newStateTemp)
-            newStateTemp = self%v_mV + self%conf%timeStep_ms * k3
-            newtTemp = t + self%conf%timeStep_ms
-            k4 = self%dVdt(newtTemp, newStateTemp)
+        k2 = self%dVdt(t + self%conf%timeStepByTwo_ms, self%v_mV + self%conf%timeStepByTwo_ms * k1)
+        k3 = self%dVdt(t + self%conf%timeStepByTwo_ms, self%v_mV + self%conf%timeStepByTwo_ms * k2)
+        k4 = self%dVdt(t + self%conf%timeStep_ms, self%v_mV + self%conf%timeStep_ms * k3)
                 
         self%v_mV = self%v_mV + self%conf%timeStepBySix_ms * (k1+ 2.0*k2 + 2.0*k3 + k4)
         
