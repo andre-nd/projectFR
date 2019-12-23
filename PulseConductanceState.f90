@@ -26,7 +26,7 @@ module PulseConductanceStateClass
     use ConfigurationClass
     implicit none
     private
-    integer, parameter :: wp = kind( 1.0d0 )
+    integer, parameter :: wp = kind(1.0d0)
     public :: PulseConductanceState
 
 
@@ -178,9 +178,9 @@ module PulseConductanceStateClass
                     self%value = self%value*self%BetaExp
                 else if (t > self%endOfPulse_ms) then
                     call self%changeState(t)
-                    self%value = self%value*self%BetaExp                 
-                else 
-                    self%value = (self%value - 1) * self%AlphaExp + 1                
+                    self%value = self%value*self%BetaExp
+                else
+                    self%value = (self%value - 1) * self%AlphaExp + 1
                 end if
             else
                 if (.not.self%state) then

@@ -580,10 +580,10 @@ module MotorUnitClass
         
         do i = 1, self%Compartments(comp)%numberChannels
             do j = 1, self%Compartments(comp)%Channels(i)%lenStates
-                call self%Compartments(comp)%Channels(i)%condState(j)%changeState(t) 
+                call self%Compartments(comp)%Channels(i)%condState(j)%changeState(t)
             end do
         end do
-    end subroutine                  
+    end subroutine
               
     subroutine atualizeDelay(self, t)
         ! '''
@@ -615,9 +615,9 @@ module MotorUnitClass
                         self%tSpikes(self%somaIndex) = t
                         call AddToList(self%somaSpikeTrain, t)
                         self%Delay%indexAntidromicSpike = self%Delay%indexAntidromicSpike  + 1
-                        do i = 1, self%Compartments(self%somaIndex)%numberChannels                    
+                        do i = 1, self%Compartments(self%somaIndex)%numberChannels
                             do j = 1, self%Compartments(self%somaIndex)%Channels(i)%lenStates
-                                call self%Compartments(self%somaIndex)%Channels(i)%condState(j)%changeState(t)    
+                                call self%Compartments(self%somaIndex)%Channels(i)%condState(j)%changeState(t)
                             end do
                         end do
                     end if

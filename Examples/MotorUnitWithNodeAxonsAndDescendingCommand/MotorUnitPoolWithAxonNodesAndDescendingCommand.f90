@@ -4,7 +4,7 @@ program MotorUnitPoolWithAxonNodesAndDescendingCommand
     use InterneuronPoolClass
     use SynapticNoiseClass
     use ConfigurationClass
-    use ogpf 
+    use ogpf
     use randomSeedInitialize
     use MuscleNoHillClass
     use CharacterArrayClass
@@ -66,6 +66,14 @@ program MotorUnitPoolWithAxonNodesAndDescendingCommand
     
     FR = 185.0
     GammaOrder = 2
+
+    do j = 1, size(neuralTractPools)
+        call neuralTractPools(j)%reset()
+    end do
+
+    do j = 1, size(motorUnitPools)
+        call motorUnitPools(j)%reset()
+    end do
 
     tic =  dsecnd()
     do i = 1, size(t)        

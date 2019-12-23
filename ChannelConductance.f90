@@ -163,9 +163,10 @@ module ChannelConductanceClass
         integer :: i    
         
 
-        do i = 1, self%lenStates 
+
+        do i = 1, self%lenStates
             call self%condState(i)%computeStateValue(t) 
-        end do       
+        end do
         
         if (trim(self%channelKind)=='Kf') then
             !     It is computed as:
@@ -181,7 +182,7 @@ module ChannelConductanceClass
             ! \f{equation}{
             !     g = g_{max}q^2(E_0-V)
             ! \f}
-            current = self%gmax_muS*(self%condState(1)%value**2) * (self%EqPot_mV - V_mV)    
+            current = self%gmax_muS*(self%condState(1)%value**2) * (self%EqPot_mV - V_mV)
         end if
         if (trim(self%channelKind)=='Na') then
             !     It is computed as:
@@ -189,7 +190,7 @@ module ChannelConductanceClass
             ! \f{equation}{
             !     g = g_{max}m^3h(E_0-V)
             ! \f} 
-            current = self%gmax_muS*(self%condState(1)%value ** 3)*self%condState(2)%value*(self%EqPot_mV - V_mV)        
+            current = self%gmax_muS*(self%condState(1)%value**3)*self%condState(2)%value*(self%EqPot_mV - V_mV)        
         end if
         !TODO:
         ! if (init_ChannelConductance%kind == 'Ca')
